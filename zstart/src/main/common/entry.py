@@ -77,7 +77,7 @@ def get_exceptionDesc(e: Exception):
 
 
 def handle_exception(e: Exception, output: str = "CONSOLE", trace: bool = True):
-    import traceback
+    import traceback, instances
     from utils.libs import unique_handler
 
     if not isinstance(e, Exception): return
