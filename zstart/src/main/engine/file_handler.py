@@ -54,12 +54,54 @@ class DataHandler:
         except Exception as e:
             print(f"An unexpected error occurred while deserializing data from JSON. Error: {e}")
 
-class BaseJSON:
-    """Base class for handling JSON serialization, and optionally encrypt and pickle."""
+    @staticmethod
+    def _serialize_yaml(data) -> str | None:
+        try:
+            return yaml.dump(data, indent=4)
+        except TypeError as e:
+            print(f"Failed to serialize data to YAML. Ensure that all data types are serializable. Error: {e}")
+        except OverflowError as e:
+            print(f"Failed to serialize data to YAML. Data is too large to be serialized. Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred while serializing data to YAML. Error: {e}")
 
-    def __init__(self, class_obj: object, file_path: str):
+    @staticmethod
+    def _deserialize_yaml(data: str | bytes):
+        try:
+            return yaml.safe_load(data)
+        except ValueError as e:
+            print(f"Failed to deserialize data from YAML. Ensure that the data is a valid YAML. Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred while deserializing data from YAML. Error: {e}")
+
+#    @staticmethod
+#    def _serialize_toml(data) -> str | None:
+#        try:
+#            return tomllib
+#        except TypeError as e:
+#            print(f"Failed to serialize data to TOML. Ensure that all data types are serializable. Error: {e}")
+#        except OverflowError as e:
+#            print(f"Failed to serialize data to TOML. Data is too large to be serialized. Error: {e}")
+#        except Exception as e:
+#            print(f"An unexpected error occurred while serializing data to TOML. Error: {e}")
+
+    @staticmethod
+    def _deserialize_toml(data: str | bytes):
+        try:
+            return tomllib.loads(data)
+        except ValueError as e:
+            print(f"Failed to deserialize data from TOML. Ensure that the data is a valid TOML. Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred while deserializing data from TOML. Error: {e}")
+
+class BaseHandler:
+    """Base class for handling file operations with serialization."""
+
+    def __init__(self, class_obj: object, file_path: str, serialize_json: bool = False, serialize_yaml: bool = False, serialize_toml: bool = False):
         self.class_obj = class_obj
-        self.serialize_json = True
+        self.serialize_json = serialize_json
+        self.serialize_yaml = serialize_yaml
+        self.serialize_toml = serialize_toml
         self.class_data = dataclasses.asdict(class_obj) if dataclasses.is_dataclass(class_obj) else class_obj.__dict__
         # Ensure directory exists
         if file_dir := os.path.dirname(file_path):
@@ -72,6 +114,12 @@ class BaseJSON:
             if self.serialize_json:
                 data = DataHandler._serialize_json(self.class_data)
                 if data is None: return
+            elif self.serialize_yaml:
+                data = DataHandler._serialize_yaml(self.class_data)
+                if data is None: return
+            #elif self.serialize_toml:
+            #    data = DataHandler._serialize_toml(self.class_data)
+            #    if data is None: return
 
             Result = DataHandler.write_file(self.file_path, data)
             if Result:
@@ -87,6 +135,12 @@ class BaseJSON:
 
             if self.serialize_json:
                 data = DataHandler._deserialize_json(data)
+                if data is None: return
+            elif self.serialize_yaml:
+                data = DataHandler._deserialize_yaml(data)
+                if data is None: return
+            elif self.serialize_toml:
+                data = DataHandler._deserialize_toml(data)
                 if data is None: return
 
             self.class_data = data
@@ -106,11 +160,11 @@ class BaseJSON:
         """Updates global variables based on loaded data. Implementation varies by subclass."""
         raise NotImplementedError("Subclasses must implement update_global()")
 
-class ConfigJSON(BaseJSON):
-    """Handles JSON operations for configuration data."""
+class ConfigHandler(BaseHandler):
+    """Handles file operations for configuration data."""
 
     def __init__(self, file_path: str, config_obj: ConfigData = configData, **kwargs):
-        super().__init__(config_obj, file_path, **kwargs)
+        super().__init__(config_obj, file_path, **kwargs, serialize_yaml=True)
 
     def on_saved_file(self):
         ...
