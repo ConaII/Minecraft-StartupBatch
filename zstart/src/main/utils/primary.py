@@ -2,13 +2,26 @@ import os, subprocess
 from pathlib import Path
 
 import instances
-
 from instances import configData
+
+from common import entry
 
 from common.entry import write
 from common.colors import wc, fg, rs, HexFg
 
 from utils import useful
+
+def loadParameters():
+    write()
+    write(f"{instances.INFO} {fg(216,190,80)}{useful.get_current_time()}")
+    write(f"{instances.PREFIX} {fg.grey}Loading startup parameters...")
+    write()
+
+def startSRV():
+    write()
+    write(f"{instances.INFO} {fg(216,190,80)}{useful.get_current_time()}")
+    write(f"{instances.PREFIX} {fg.grey}Starting Server...")
+    write()
 
 def change_cwd(path: str):
     path = Path(path).absolute()
@@ -19,6 +32,9 @@ def change_cwd(path: str):
     else:
         write(f"{instances.PREFIX} {fg.grey}Working directory changed to: {HexFg("#f8a022")}{path}")
         os.chdir(path)
+
+def update_title():
+    entry.set_title(configData.console.title)
 
 def accept_eula():
     path = Path('eula.txt')
@@ -82,15 +98,3 @@ def run_server():
         print(rs.all)
     else:
         write(f"{instances.WARN} {wc.warn}Can't access JAR executable, permission error?\n")
-
-def loadParameters():
-    write()
-    write(f"{instances.INFO} {fg(216,190,80)}{useful.get_current_time()}")
-    write(f"{instances.PREFIX} {fg.grey}Loading startup parameters...")
-    write()
-
-def startSRV():
-    write()
-    write(f"{instances.INFO} {fg(216,190,80)}{useful.get_current_time()}")
-    write(f"{instances.PREFIX} {fg.grey}Starting Server...")
-    write()
