@@ -35,7 +35,7 @@ def main():
         write(f"{instances.PREFIX} {HexFg("#e9326a")}Loading ZStart version {versions.SOFTWARE_VERSION} ...\n")
         start()
         if instances.localData.restart:
-            write(f"{wc.warn}Press any key to restart the game.")
+            write(f"{wc.warn}Press any key to restart the program.")
             lxTerm.getch()
             main()
     except Exception as e:
